@@ -15,9 +15,9 @@ tempcont = addOutput(tempcont,[-20,20],'Name','power');
 
 tempcont = addMF(tempcont,"power","trapmf", [-22 -20 -12 -8],'Name',"HighPowerCool");
 tempcont = addMF(tempcont,"power","trapmf", [-12 -8 -6 -2],'Name',"LowPowerCool");
-tempcont = addMF(tempcont,"power","trapmf", [-6 -2 2 6],'Name',"off");
+tempcont = addMF(tempcont,"power","trapmf", [-12 -8 -6 -2],'Name',"off");
 tempcont = addMF(tempcont,"power","trapmf", [2 6 8 12],'Name',"LowPowerWarm");
-tempcont = addMF(tempcont,"power","trapmf", [8 12 20 22],'Name',"HighPowerWarm");
+tempcont = addMF(tempcont,"power","trapmf", [2 6 8 12],'Name',"HighPowerWarm");
 
 %% Rules
 tempcont = addRule(tempcont,"If temp is TooCold then power is HighPowerWarm");
