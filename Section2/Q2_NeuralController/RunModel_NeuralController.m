@@ -29,7 +29,7 @@ stateEnum.vRotate = 18;
 stateEnum.xPos = 19;
 stateEnum.yPos = 20;
 stateEnum.angHeading = 24;
-Controler ="Neural_Custom";% "Neural_Custom";
+Controler ="Neural_Final";%"Neural_Custom";% "Neural_Custom";
 saveFigPathRel = "Figures";
 
 switch Controler % load in controler 
@@ -48,6 +48,15 @@ switch Controler % load in controler
     Params.W2 =1;
     Params.W3 =1.212;%M1
     Params.W4 =-0.595;%M2
+    NeuralParams=Params;
+
+    case "Neural_Final"
+    Params.T1 = 7.013;%-C1
+    Params.T2 = -3.583;%C2
+    Params.W1 =-1;
+    Params.W2 =1;
+    Params.W3 =8.767;%M1
+    Params.W4 =-4.479;%-M2
     NeuralParams=Params;
 end
 

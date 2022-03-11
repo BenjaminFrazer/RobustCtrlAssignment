@@ -24,17 +24,26 @@ It is possible to implement a controller for either configuration, however the f
 *** difficulties
 It is worth noting that the limited number of neurons in the network impose fundamental geometric limitations on the logical rules that may be implement. If one considers the inputs to the robot to be a two dimensional state-space, it can be shown that any combination two weights and biases must constitute a strait line bisecting the state-space. Depending on the output "wiring" of the neural net to the motors the area enclosed by one of these lines will mean either full forward or reverse/stop for the output of a given wheel as a function of the input states. When the lines for each wheel are drawn on the state-space the intersection of the areas where the wheels are moving forward will constitute forward motion for the robot as a whole, while the areas were both are zero will be either stationary or in full reverse depending on what the output of logical zero from the neural net maps to.
 
-A basic fundamental requirement of the robot be that it should go in a strait line when there are no obstacles in front of it. Since the sensor saturate at distance >1. The only thing that must be satisfied in the state-space is that the infinitesimal region around Rs=1 and LS=1 be an intersection of the two regions corresponding to forward motion of each wheel.
+A basic fundamental requirement of the robot be that it should go in a strait line when there are no obstacles in front of it. Since the sensor saturate at distance >1. At minimum, the only thing that must be satisfied in the state-space is that the infinitesimal region around Rs=1 and LS=1 be an intersection of the two regions corresponding to forward motion of each wheel.
 
-The second constraint relates to the turning circle of the robot, from testing, it was observed that the turning circle with one wheel stationary, is ~0.8, this means that the robot must begin turning almost as soon as it the object is in sensory range. This imposes a second geometric constraint, that any
+The second constraint relates to the turning circle of the robot, from testing, it was observed that the turning circle with one wheel stationary, is ~0.8, this means that the robot must begin turning almost as soon as the object is in sensory range. This imposes a second geometric constraint, that turning begin out-with the square drawn from the origin to the point LS=0.8,RS=0.8. Stated another way 'going forward' region where LW=1&RW=1 (shown in blue) must not cross into the region, LS=<0.8|RS=<0.8 (in the figure below it does).
 
+A final consideration that in the case of the two selected wheel states being forward and stationary, there exists the possibility for "dead-zones" to exist where both wheels are zero. Once the robot crosses into such a region it is impossible to get out. This is another example where the choice to go with forward and backward wheel activation is superior! One can show that such a region is an inevitable outcome of any overlap in the two regions, just from basic geometry. Restated this means that if we want the robot to move forward, then by definition we must accept a dead-zone. We do however have the freedom to chose where this dead-zone appears. In the figure below the 'go forward' region has been chosen such that the dead-zone is on the negative axis, values which we know the sensor will never take.
+
+#+ATTR_ORG: :width 400
+#+ATTR_LATEX:  :width 400
 [[file:Figures/StateSpace_Neuron.png]]
 
+With these geometric constraints in place, and with the understanding that the RW=1,LW=1 region may only be defined by strait lined due to the architecture of the network, the following geometry is proposed:
 
-This means that the turning options of the robot in the former case are either turn in a large arc, or turn on the spot in the latter case. It turns out it is possible to implement a collision avoidance robot with both options, the latter option has some difficulties associated with it.
+#+ATTR_ORG: :width 400
+#+ATTR_LATEX:  :width 400
+[[file:Figures/StateSpace_Neuron_Design2.drawio.png]]
 
-the proposed architecture, the neural net based controller is extreme limited in the behavior it can be made to elicit.
-The behavior at maximum distance may be specified as a condition that must be satisfied by the logic of the controller.
+From the equations of the lines bounding the two regions, it is trivial to derive the corresponding weights and thresholds. These are shown in the table.
+
+
+
 #+NAME: tabNetParams
 |   | T1 | T2 | W1 | W2 | w3  | w4    | Bias_ML | Bias_MR |
 |---+----+----+----+----+-----+-------+---------+---------|
