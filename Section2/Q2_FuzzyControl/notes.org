@@ -1,0 +1,22 @@
+* Notes on what i did to improve the controler 
+- there were lots of oscilations in the orginal controler design
+- and it just oscilated in a strait line when it hit a wall front on
+- to compensate for this i first added a bias term to the left motor membership function as shown below 
+
+#+begin_src octave 
+colisCont = addMF(colisCont,"distL","trapmf", [-10 -10 0.25+bias 0.45+bias],'Name',"TooClose");
+colisCont = addMF(colisCont,"distL","trapmf", [0.2+bias 0.4+bias 0.5+bias 0.7+bias],'Name',"Close");
+colisCont = addMF(colisCont,"distL","trapmf", [0.5+bias 0.9+bias 1.1 2],'Name',"Near");
+#+end_scr
+
+This had the effect of the robot preferentialy turning left, but the oscillations still remained.
+
+I first tried to remove the oscilation terms by "somoothing out" the transitions between membership functions so they werent to steep, this did very little to change the behaviour however. 
+I was suspicous because it seemed that the robot seemed to drive strait untill it hit a wall and then imidiately started reversing, while i expected it to begin smoothly turning due 
+the bias terms. I dug a little into the rules and found the following suspicious rule:
+
+#+begin_src octave
+colisCont = addRule(colisCont,"distL==Close & distR==Close => powerL=Rev, powerR=Rev (1)"); % causing oscilation??
+#+end_scr 
+
+After commenting this out the robot began working without any oscilations as can be seen in Figures ref:figCustomContxVy-ref:figCustomContxVt.

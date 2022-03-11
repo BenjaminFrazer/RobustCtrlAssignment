@@ -20,23 +20,50 @@
 close all;
 clear all;
 clc;
+homeDir = fileparts(mfilename('fullpath'));
+addpath(genpath(fullfile(homeDir,"\..\..\")))
 
+% BF
+stateEnum.vForward = 13;
+stateEnum.vRotate = 18;
+stateEnum.xPos = 19;
+stateEnum.yPos = 20;
+stateEnum.angHeading = 24;
+bias = -0.1
+Controler = "Fzy_Custom";%"Fzy_Base";%
+saveFigPathRel = "Figures";
+switch Controler % load in controler 
+    case "Fzy_Base"
+    load("colisCont.mat")
+
+    case "Fzy_Custom"
+    DefineControlerCustom
+
+    load('colisCont_custom.mat')
+end
 %% Simulation setup
 % Time
-simulationTime_total = 3;           % in seconds *------* YOU CAN CHANGE THIS
+simulationTime_total = 12;           % in seconds *------* YOU CAN CHANGE THIS
 stepSize_time = 0.05;               % in seconds 
 
 % Initial states and controls
-voltage_left  = 6;                  % in volts *------* YOU CAN CHANGE THIS
-voltage_right = 6;                  % in volts *------* YOU CAN CHANGE THIS
-
+voltage_left_init = 6;
+voltage_right_init = 6;
+voltage_left  = voltage_left_init;                  % in volts *------* YOU CAN CHANGE THIS
+voltage_right = voltage_right_init;                  % in volts *------* YOU CAN CHANGE THIS
 state_initial = zeros(1,24);        % VARIABLES OF IMPORTANCE:
                                     % state_initial(13): forward velocity,    v, m/s
                                     % state_initial(18): rotational velocity, r, rad/s
                                     % state_initial(19): current x-position,  x, m
                                     % state_initial(20): current y-position,  y, m
                                     % state_initial(24): heading angle,       psi, rad
-                                    
+doTurnRight = true;
+turnRightTime = 1;
+turnRightAngleFinal = pi/2; %turn until we reach this angle
+
+turnLeftTime = 4;
+turnLeftAngleFinal = 0; %turn until we reach this angle 
+doTurnLeft = false;
 % Environment
 canvasSize_horizontal = 10;
 canvasSize_vertical   = 10;
@@ -46,6 +73,7 @@ stepSize_canvas       = 0.01;
 %  YOU CAN ADD MORE SETUP HERE 
 %  (e.g. setup of controller or checkpoints)
 % *------------------------------------------*
+
 
 %% Create Environment
 obstacleMatrix = zeros(canvasSize_horizontal / stepSize_canvas, canvasSize_vertical / stepSize_canvas);
@@ -65,20 +93,37 @@ obstacleMatrix = zeros(canvasSize_horizontal / stepSize_canvas, canvasSize_verti
 timeSteps_total = simulationTime_total/stepSize_time;
 state = state_initial;
 time = 0;
+array2write = [0,0];
+sensorOutLeft = zeros(timeSteps_total);
+sensorOutRight = zeros(timeSteps_total);
 
 % Run simulation
 for timeStep = 1:timeSteps_total
-    % Assign voltage applied to wheels
-    voltages = [voltage_left; voltage_left; voltage_right; voltage_right];
+
     
     % *-------------------------------------*
     %  YOU CAN ADD/CHANGE YOUR CONTROLS HERE
     % *-------------------------------------*
-    if timeStep == 1/stepSize_time
-        voltage_left  = -6;
-        voltage_right = 6;
-    end
+    %[l,r]
+    sensorOut = Sensor(state(timeStep,19), state(timeStep,20), state(timeStep,24), obstacleMatrix);
     
+    %make sure we are sending correct data to correct input!
+    sensorOurIdxLeft = 1;
+    sensorOurIdxRight = 2;
+    sensorOutLeft(timeStep) = sensorOut([colisCont.Inputs.Name]=="distL");
+    sensorOutRight(timeStep) = sensorOut([colisCont.Inputs.Name]=="distR");
+    array2write(sensorOurIdxLeft)=sensorOutLeft(timeStep);
+    array2write(sensorOurIdxRight)=sensorOutLeft(timeStep);
+
+    contAction = evalfis(colisCont,array2write);
+
+   
+    voltage_left = contAction([colisCont.Outputs.Name]=="powerL");
+    voltage_right = contAction([colisCont.Outputs.Name]=="powerR");
+
+    % Assign voltage applied to wheels
+    voltages = [voltage_left; voltage_left; voltage_right; voltage_right];
+
     % Run model *** DO NOT CHANGE
     [state_derivative(timeStep,:), state(timeStep,:)] = DynamicalModel(voltages, state(timeStep,:), stepSize_time);   
     
@@ -94,17 +139,37 @@ for timeStep = 1:timeSteps_total
     xlabel('y, m'); ylabel('x, m');
 end
 
+
+
 %% Plot results
 % *----------------------------------*
 %  YOU CAN ADD OR CHANGE FIGURES HERE
 %  don't forget to add axis labels!
 % *----------------------------------*
 
-figure(2); hold on; grid on;
-plot(state(:,20), state(:,19));
 
-figure(3); hold on; grid on;
-plot(time, state(:,19));
+FigTag="xVy";
+thisFileName = fullfile(pwd,saveFigPathRel, strcat(FigTag,Controler));
+figure(2); hold on; grid on;title("XY Path Robot taken");axis equal;
+plot(state(:,stateEnum.yPos), state(:,stateEnum.xPos));
+xlabel("y Position (m)"); ylabel("x Position (m)");
+plot(wall_1(:,1), wall_1(:,2),'k-');
+plot(wall_2(:,1), wall_2(:,2),'k-');
+savefig(gcf,thisFileName)
+saveas(gcf,strcat(thisFileName,".png"))
 
-figure(4); hold on; grid on;
-plot(time, state(:,24));
+FigTag="xVt";
+thisFileName = fullfile(pwd,saveFigPathRel, strcat(FigTag,Controler));
+figure(3); hold on; grid on;title("Robot X coord Vs time")
+plot(time, state(:,stateEnum.xPos));
+ylabel("x Position (m)"); xlabel("time (s)");
+savefig(gcf,thisFileName)
+saveas(gcf,strcat(thisFileName,".png"))
+
+FigTag="psiVt";
+thisFileName = fullfile(pwd,saveFigPathRel, strcat(FigTag,Controler));
+figure(4); hold on; grid on; title("Robot Heading angle Vs time")
+plot(time, state(:,stateEnum.angHeading));
+ylabel("Heading Angle (rad)"); xlabel("time (s)");
+savefig(gcf,thisFileName)
+saveas(gcf,strcat(thisFileName,".png"))
