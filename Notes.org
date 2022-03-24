@@ -1,27 +1,36 @@
 * Notes on Base neural controller 
 A Neural net was implemented as a function taking two arguments:
-- the neural parms i.e. weights and thresholds
+- the neural params i.e. weights and thresholds
 - the current value of the sensors
+
+[[file:./images/screenshot-01.png]]
 
 The code is as follows.
 #+begin_src octave
-ML = (input.LS*Params.W1+input.RS*Params.W3)>=Params.T1;
-MR = (input.RS*Params.W4+input.LS*Params.W2)>=Params.T2;
-#+end_src 
+ML = (input.LS*Params.W1+input.RS*Params.W3)>Params.T1; %1
+MR = (input.RS*Params.W4+input.LS*Params.W2)>Params.T2; %2
+#+end_src
 
-Using the base parameters and the neurons threshold activation function, at 
+Equivalent Equation:
+#+NAME: eqNeuralController_Base
+\begin{align}
+LS\times W_1+RS\times W_3 >T_1\\
+LS\times W_2 +RS\times W_4 >T_2
+\end{align}
+
+Using the base parameters and the neurons threshold activation function, at
 max sensor distance (1) the robot still has one wheel going forward and one 
 stationary meaning it turns in a circle. 
 
 * Notes on improving neural net
-** Maximum distance behavior
+** Maximum distance behaviour
 Though not specified, the  activation function for the neural net is assumed to be a simple threshold meaning that the output of the net may only be a one or a zero. this means that any motor may only be in one of two states. these could be:
 - forward or off
 - forward and backward
 
 It is possible to implement a controller for either configuration, however the first option is substantially more challenging this is what i cose to implement and describe here.
 
-*** difficulties
+*** Design of optimal Gains and Weights
 It is worth noting that the limited number of neurons in the network impose fundamental geometric limitations on the logical rules that may be implement. If one considers the inputs to the robot to be a two dimensional state-space, it can be shown that any combination two weights and biases must constitute a strait line bisecting the state-space. Depending on the output "wiring" of the neural net to the motors the area enclosed by one of these lines will mean either full forward or reverse/stop for the output of a given wheel as a function of the input states. When the lines for each wheel are drawn on the state-space the intersection of the areas where the wheels are moving forward will constitute forward motion for the robot as a whole, while the areas were both are zero will be either stationary or in full reverse depending on what the output of logical zero from the neural net maps to.
 
 A basic fundamental requirement of the robot be that it should go in a strait line when there are no obstacles in front of it. Since the sensor saturate at distance >1. At minimum, the only thing that must be satisfied in the state-space is that the infinitesimal region around Rs=1 and LS=1 be an intersection of the two regions corresponding to forward motion of each wheel.
@@ -32,13 +41,13 @@ A final consideration that in the case of the two selected wheel states being fo
 
 #+ATTR_ORG: :width 400
 #+ATTR_LATEX:  :width 400
-[[file:Figures/StateSpace_Neuron.png]]
+[[file:figures/StateSpace_Neuron.png]]
 
 With these geometric constraints in place, and with the understanding that the RW=1,LW=1 region may only be defined by strait lined due to the architecture of the network, the following geometry is proposed:
 
 #+ATTR_ORG: :width 400
 #+ATTR_LATEX:  :width 400
-[[file:Figures/StateSpace_Neuron_Design2.drawio.png]]
+[[file:figures/StateSpace_Neuron_Design2.drawio.png]]
 
 From the equations of the lines bounding the two regions, it is trivial to derive the corresponding weights and thresholds. These are shown in the table.
 
@@ -62,3 +71,23 @@ From the equations of the lines bounding the two regions, it is trivial to deriv
 | # |      2 | 0.1 | 0.05 |         0 |        -0.225 |                0 | -0.045 |
 #+TBLFM: $8=$LS*remote(tabNetParams,$W1)+$RS*remote(tabNetParams,$W3)+remote(tabNetParams,$Bias_ML):: $6=$RS*remote(tabNetParams,$W4)+$LS*remote(tabNetParams,$W2)+remote(tabNetParams,$Bias_MR)
 - The problem may be defined in-terms of geometry, whereby the threshold function
+* Section 3 -  Neural Net for way-point guidance
+** Adding a new input to the network
+#+caption: Neural Structure That Incudes the additional neuron for heading angle
+#+NAME: figNeuralStruct
+
+[[file:figures/NeuralStructure.png]]
+
+Equivalent Equation (True is forward False is Back):
+#+NAME: eqNeuralController_Base
+\begin{align}
+LS\times W_1+RS\times W_3 +\theta\times W_5&>T_1 \text{ (Left Wheel)}\\
+LS\times W_2 +RS\times W_4 +\theta \times W_6&>T_2 \text{ (Right Wheel)}
+\end{align}
+
+If one visualises the state-space of the inputs as a now a 3D coordinate system with, the coordinate axes:
+- RS: Right Sensor
+- LS: Left Sensor
+- \theta: Heading Angle
+
+Then the form of the neuron firing rules derived from the new architecture in Figure ref:figNeuralStruct boundaries of the inequality defined above
