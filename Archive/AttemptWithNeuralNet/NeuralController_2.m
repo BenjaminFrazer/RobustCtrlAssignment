@@ -1,5 +1,5 @@
 % Neural Network 
-function [out] = NeuralController(input,Params)
+function [out] = NeuralController_2(input,Params)
 %     Params.T1 = 0;
 %     Params.T2 = 0.2;
 %     Params.W1 =+1;
@@ -10,8 +10,8 @@ function [out] = NeuralController(input,Params)
 %     input.LS =  1;
 %     input.RS = 1;
 %% calculate output
-ML = (input.LS*Params.W1+input.RS*Params.W3)>Params.T1; %1
-MR = (input.RS*Params.W4+input.LS*Params.W2)>Params.T2; %2
+ML = (input.LS*Params.W1+input.RS*Params.W3+Params.W5*input.Theta)>Params.T1; %1
+MR = (input.RS*Params.W4+input.LS*Params.W2+Params.W6*input.Theta)>Params.T2; %2
 
 %%
 out.ML = ML;

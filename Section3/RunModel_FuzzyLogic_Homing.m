@@ -30,9 +30,9 @@ stateEnum.vRotate = 18;
 stateEnum.xPos = 19;
 stateEnum.yPos = 20;
 stateEnum.angHeading = 24;
-Controler ="Neural_Sect3";%"Neural_Custom";% "Neural_Custom";
+Controler ="Custom_Homing";%"Neural_Custom";% "Neural_Custom";
 saveFigPathRel = "Figures";
-idxWaypoint = 1
+idxWaypoint = 1;
 % checkpoints
 %    x      y
 points =[...
@@ -41,50 +41,29 @@ points =[...
     3,      -2;...
     -1,     -2;...
     -0.7, -0.7;...
-        ]
-waypoints_tab = array2table(points, 'VariableNames',{'X','Y'})
+        ];
+points_task2 =[...
+    2,       3;...
+    1,     4;...
+    3,      -4;...
+    -1,     -2;...
+    -3, -0;
+    1.5, 2 ;...
+        ];
+waypoints_tab = array2table(points_task2, 'VariableNames',{'X','Y'});
 tolerance = 0.05; % the tollerance at which the robot is considered to have arrived
 
 switch Controler % load in controler 
-    case "Neural_Base"
-    NeuralParams.T1 = 0;
-    NeuralParams.T2 = 0;
-    NeuralParams.W1 =-1.4;
-    NeuralParams.W2 =1.2;
-    NeuralParams.W3 =1.25;
-    NeuralParams.W4 =-1;
+    case "Fuzzy"
+    load("colisCont.mat")
 
-    case "Neural_Custom"
-    Params.T1 = 0.2;%-C1
-    Params.T2 = -0.1;%C2
-    Params.W1 =-1;
-    Params.W2 =1;
-    Params.W3 =1.212;%M1
-    Params.W4 =-0.595;%M2
-    NeuralParams=Params;
-
-    case "Neural_Final"
-    Params.T1 = 7.013;%-C1
-    Params.T2 = -3.583;%C2
-    Params.W1 =-1;
-    Params.W2 =1;
-    Params.W3 =8.767;%M1
-    Params.W4 =-4.479;%-M2
-    NeuralParams=Params;
-
-    case "Neural_Sect3"
-    Params.T1 = 0.25;%-C1
-    Params.T2 = 0.24;%C2
-    Params.W1 =1;
-    Params.W2 =1;
-    Params.W3 =0;%M1
-    Params.W4 =0;%-M2
-    NeuralParams=Params;
+    case "Custom_Homing"
+    DefineControlerCustom_Homing
 end
 
 %% Simulation setup
 % Time
-simulationTime_total = 80;           % in seconds *------* YOU CAN CHANGE THIS
+simulationTime_total = 60;           % in seconds *------* YOU CAN CHANGE THIS
 stepSize_time = 0.05;               % in seconds 
 
 % Initial states and controls
@@ -93,10 +72,10 @@ voltage_right_init = 6;
 voltage_left  = voltage_left_init;                  % in volts *------* YOU CAN CHANGE THIS
 voltage_right = voltage_right_init;                  % in volts *------* YOU CAN CHANGE THIS
 state_initial = zeros(1,24);        % VARIABLES OF IMPORTANCE:
-                                    % state_initial(13): forward velocity,    v, m/s
+% state_initial(13)= %forward velocity,    v, m/s
                                     % state_initial(18): rotational velocity, r, rad/s
-                                    % state_initial(19): current x-position,  x, m
-                                    % state_initial(20): current y-position,  y, m
+state_initial(19)= 1.5;%: current x-position,  x, m
+state_initial(20)= 2;%: current y-position,  y, m
                                     % state_initial(24): heading angle,       psi, rad
 doTurnRight = true;
 turnRightTime = 1;
@@ -121,9 +100,13 @@ obstacleMatrix = zeros(canvasSize_horizontal / stepSize_canvas, canvasSize_verti
 
 % Generate walls
 % --> the variable "obstacleMatrix" is updated for each added wall
-[wall_1, obstacleMatrix] = WallGeneration( -1,  1, 1.2, 1.2, 'h', obstacleMatrix); 
-[wall_2, obstacleMatrix] = WallGeneration( -3, -3,  -2,   2, 'v', obstacleMatrix);
-[wall_3, obstacleMatrix] = WallGeneration( -3, -2,  -3,  -3, 'h', obstacleMatrix);
+% [wall_1, obstacleMatrix] = WallGeneration( -1,  1, 1.2, 1.2, 'h', obstacleMatrix); 
+% [wall_2, obstacleMatrix] = WallGeneration( -3, -3,  -2,   2, 'v', obstacleMatrix);
+% [wall_3, obstacleMatrix] = WallGeneration( -3, -2,  -3,  -3, 'h', obstacleMatrix);
+
+[wall_1, obstacleMatrix] = WallGeneration( -4, 0.5, 1, 1, 'h', obstacleMatrix);
+[wall_2, obstacleMatrix] = WallGeneration( 2, 2,-1,1, 'v', obstacleMatrix);
+[wall_3, obstacleMatrix] = WallGeneration( -2.5, -2.5, 2.5, 5, 'v', obstacleMatrix);
 
 % *---------------------------*
 %  YOU CAN ADD MORE WALLS HERE
@@ -153,29 +136,39 @@ for timeStep = 1:timeSteps_total
     sensorOutIdxRight = 2;
     sensorOutLeft(timeStep) = sensorOut(sensorOutIdxLeft);
     sensorOutRight(timeStep) = sensorOut(sensorOutIdxRight);
-    array2write(sensorOutIdxLeft)=sensorOutLeft(timeStep);
-    array2write(sensorOutIdxRight)=sensorOutLeft(timeStep);
 
+    
     NeuralInput.LS = sensorOutLeft(timeStep);
     NeuralInput.RS = sensorOutRight(timeStep);
+
 
     % compute heading angle
     currentLocation = state(timeStep,19:20);
     checkpoint = [waypoints_tab.X(idxWaypoint), waypoints_tab.Y(idxWaypoint)];
     [booleanAtCheckpoint, newHeadingAngle] = ComputeHeadingAngle(currentLocation, checkpoint, tolerance);
+    Theta = wrapToPi((newHeadingAngle)-(state(timeStep,stateEnum.angHeading)));
+    
+    array2write(sensorOutIdxLeft)=sensorOutLeft(timeStep);
+    array2write(sensorOutIdxRight)=sensorOutRight(timeStep);
+    array2write(3)=Theta;
 
+
+% NeuralInput.Theta = 0;
     %check if we have reached waypoint
     if booleanAtCheckpoint
-        idxWaypoint=idxWaypoint+1
+        idxWaypoint=idxWaypoint+1;
     end
     %% controller
     %%
 %     NeuralInput.LS = 1;
 %     NeuralInput.RS = 1;
-    [out] = NeuralController(NeuralInput,NeuralParams);
 
-    voltage_left = (out.ML)*2-1;
-    voltage_right = (out.MR)*2-1;
+    contAction = evalfis(colisCont,array2write);
+
+   
+    voltage_left = contAction([colisCont.Outputs.Name]=="powerL");
+    voltage_right = contAction([colisCont.Outputs.Name]=="powerR");
+
 
     % Assign voltage applied to wheels
     voltages = [voltage_left; voltage_left; voltage_right; voltage_right];
@@ -190,6 +183,7 @@ for timeStep = 1:timeSteps_total
     % Plot robot on canvas  *------* YOU CAN ADD STUFF HERE
     figure(1); clf; hold on; grid on; axis([-5,5,-5,5]);
     DrawRobot(0.2, state(timeStep,20), state(timeStep,19), state(timeStep,24), 'b');
+    plot(waypoints_tab.Y(idxWaypoint),waypoints_tab.X(idxWaypoint),"Marker","*")
     plot(wall_1(:,1), wall_1(:,2),'k-');
     plot(wall_2(:,1), wall_2(:,2),'k-'); 
     plot(wall_3(:,1), wall_3(:,2),'k-');
