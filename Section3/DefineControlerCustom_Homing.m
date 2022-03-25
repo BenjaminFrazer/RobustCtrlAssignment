@@ -1,7 +1,7 @@
 clear colisCont
 close all
 
-bias = 0;
+bias = 0.02;
 
     %%
 colisCont = mamfis('Name',"Collision Aviodance");
@@ -13,12 +13,12 @@ colisCont = addInput(colisCont,[-pi,pi],'Name',"angle");
 
 colisCont = addMF(colisCont,"distL","trapmf", [-10 -10 0.15 0.6+bias],'Name',"TooClose");
 % colisCont = addMF(colisCont,"distL","trapmf", [0.05 0.2+bias 0.5+bias 0.7+bias],'Name',"Close");
-colisCont = addMF(colisCont,"distL","trapmf", [0.6+bias 0.9 1.1 2],'Name',"Far");
+colisCont = addMF(colisCont,"distL","trapmf", [0.5+bias 0.9 1.1 2],'Name',"Far");
 colisCont = addMF(colisCont,"distL","trapmf", [0.15+bias 0.5+bias 0.7+bias 0.9],'Name',"Near");
 
 colisCont = addMF(colisCont,"distR","trapmf", [-10 -10 0.15 0.6],'Name',"TooClose");
 % colisCont = addMF(colisCont,"distR","trapmf", [0.05 0.2 0.5 0.7],'Name',"Close");
-colisCont = addMF(colisCont,"distR","trapmf", [0.6 0.9 1.1 2],'Name',"Far");
+colisCont = addMF(colisCont,"distR","trapmf", [0.5 0.9 1.1 2],'Name',"Far");
 colisCont = addMF(colisCont,"distR","trapmf", [0.15 0.5 0.7 0.9],'Name',"Near");
 
 colisCont = addMF(colisCont,"angle","trapmf", [-2*pi -pi -pi/4 -pi/32],'Name',"TargetLeft");

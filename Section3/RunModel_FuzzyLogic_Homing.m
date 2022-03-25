@@ -63,7 +63,7 @@ end
 
 %% Simulation setup
 % Time
-simulationTime_total = 60;           % in seconds *------* YOU CAN CHANGE THIS
+simulationTime_total = 70;           % in seconds *------* YOU CAN CHANGE THIS
 stepSize_time = 0.05;               % in seconds 
 
 % Initial states and controls
@@ -100,13 +100,21 @@ obstacleMatrix = zeros(canvasSize_horizontal / stepSize_canvas, canvasSize_verti
 
 % Generate walls
 % --> the variable "obstacleMatrix" is updated for each added wall
-% [wall_1, obstacleMatrix] = WallGeneration( -1,  1, 1.2, 1.2, 'h', obstacleMatrix); 
-% [wall_2, obstacleMatrix] = WallGeneration( -3, -3,  -2,   2, 'v', obstacleMatrix);
-% [wall_3, obstacleMatrix] = WallGeneration( -3, -2,  -3,  -3, 'h', obstacleMatrix);
+environment = "task2Walls";
+switch environment
+    case "nowalls"
 
-[wall_1, obstacleMatrix] = WallGeneration( -4, 0.5, 1, 1, 'h', obstacleMatrix);
-[wall_2, obstacleMatrix] = WallGeneration( 2, 2,-1,1, 'v', obstacleMatrix);
-[wall_3, obstacleMatrix] = WallGeneration( -2.5, -2.5, 2.5, 5, 'v', obstacleMatrix);
+    case "originalWalls"
+        [wall_1, obstacleMatrix] = WallGeneration( -1,  1, 1.2, 1.2, 'h', obstacleMatrix);
+        [wall_2, obstacleMatrix] = WallGeneration( -3, -3,  -2,   2, 'v', obstacleMatrix);
+        [wall_3, obstacleMatrix] = WallGeneration( -3, -2,  -3,  -3, 'h', obstacleMatrix);
+    case "task2Walls"
+        [wall_1, obstacleMatrix] = WallGeneration( -4, 0.5, 1, 1, 'h', obstacleMatrix);
+        [wall_2, obstacleMatrix] = WallGeneration( 2, 2,-1,1, 'v', obstacleMatrix);
+        [wall_3, obstacleMatrix] = WallGeneration( -2.5, -2.5, 2.5, 5, 'v', obstacleMatrix);
+end
+
+
 
 % *---------------------------*
 %  YOU CAN ADD MORE WALLS HERE
@@ -121,11 +129,15 @@ time = 0;
 array2write = [0,0];
 sensorOutLeft = zeros(timeSteps_total);
 sensorOutRight = zeros(timeSteps_total);
+      
+
+
+waypointsDone= false;
 
 % Run simulation
 for timeStep = 1:timeSteps_total
 
-    
+
     % *-------------------------------------*
     %  YOU CAN ADD/CHANGE YOUR CONTROLS HERE
     % *-------------------------------------*
@@ -141,10 +153,15 @@ for timeStep = 1:timeSteps_total
     NeuralInput.LS = sensorOutLeft(timeStep);
     NeuralInput.RS = sensorOutRight(timeStep);
 
+    if idxWaypoint<=height(waypoints_tab)
+        checkpoint = [waypoints_tab.X(idxWaypoint), waypoints_tab.Y(idxWaypoint)];
+    else 
+       waypointsDone= true;
+    end
 
     % compute heading angle
     currentLocation = state(timeStep,19:20);
-    checkpoint = [waypoints_tab.X(idxWaypoint), waypoints_tab.Y(idxWaypoint)];
+
     [booleanAtCheckpoint, newHeadingAngle] = ComputeHeadingAngle(currentLocation, checkpoint, tolerance);
     Theta = wrapToPi((newHeadingAngle)-(state(timeStep,stateEnum.angHeading)));
     
@@ -152,12 +169,15 @@ for timeStep = 1:timeSteps_total
     array2write(sensorOutIdxRight)=sensorOutRight(timeStep);
     array2write(3)=Theta;
 
-
-% NeuralInput.Theta = 0;
-    %check if we have reached waypoint
     if booleanAtCheckpoint
         idxWaypoint=idxWaypoint+1;
     end
+
+% NeuralInput.Theta = 0;
+    %check if we have reached waypoint
+
+
+
     %% controller
     %%
 %     NeuralInput.LS = 1;
@@ -183,11 +203,16 @@ for timeStep = 1:timeSteps_total
     % Plot robot on canvas  *------* YOU CAN ADD STUFF HERE
     figure(1); clf; hold on; grid on; axis([-5,5,-5,5]);
     DrawRobot(0.2, state(timeStep,20), state(timeStep,19), state(timeStep,24), 'b');
+    xlabel('y, m'); ylabel('x, m');
+    if idxWaypoint<=height(waypoints_tab)
     plot(waypoints_tab.Y(idxWaypoint),waypoints_tab.X(idxWaypoint),"Marker","*")
+    end
+    try 
     plot(wall_1(:,1), wall_1(:,2),'k-');
     plot(wall_2(:,1), wall_2(:,2),'k-'); 
     plot(wall_3(:,1), wall_3(:,2),'k-');
-    xlabel('y, m'); ylabel('x, m');
+    catch
+    end
 end
 
 
@@ -204,9 +229,13 @@ thisFileName = fullfile(pwd,saveFigPathRel, strcat(FigTag,Controler));
 figure(2); hold on; grid on;title("XY Path Robot taken");axis equal;
 plot(state(:,stateEnum.yPos), state(:,stateEnum.xPos));
 xlabel("y Position (m)"); ylabel("x Position (m)");
+try
 plot(wall_1(:,1), wall_1(:,2),'k-');
 plot(wall_2(:,1), wall_2(:,2),'k-');
 plot(wall_3(:,1), wall_3(:,2),'k-');
+catch
+end
+
 savefig(gcf,thisFileName)
 saveas(gcf,strcat(thisFileName,".png"))
 
