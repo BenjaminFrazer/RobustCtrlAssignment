@@ -12,12 +12,10 @@ colisCont = addInput(colisCont,[0,1.1],'Name',"distR");
 colisCont = addInput(colisCont,[-pi,pi],'Name',"angle");
 
 colisCont = addMF(colisCont,"distL","trapmf", [-10 -10 0.15 0.6+bias],'Name',"TooClose");
-% colisCont = addMF(colisCont,"distL","trapmf", [0.05 0.2+bias 0.5+bias 0.7+bias],'Name',"Close");
 colisCont = addMF(colisCont,"distL","trapmf", [0.5+bias 0.9 1.1 2],'Name',"Far");
 colisCont = addMF(colisCont,"distL","trapmf", [0.15+bias 0.5+bias 0.7+bias 0.9],'Name',"Near");
 
 colisCont = addMF(colisCont,"distR","trapmf", [-10 -10 0.15 0.6],'Name',"TooClose");
-% colisCont = addMF(colisCont,"distR","trapmf", [0.05 0.2 0.5 0.7],'Name',"Close");
 colisCont = addMF(colisCont,"distR","trapmf", [0.5 0.9 1.1 2],'Name',"Far");
 colisCont = addMF(colisCont,"distR","trapmf", [0.15 0.5 0.7 0.9],'Name',"Near");
 
@@ -46,9 +44,7 @@ colisCont = addRule(colisCont,"distL==Near & distR==Far => powerL=Fwd, powerR=Of
 colisCont = addRule(colisCont,"distL==Far & distR==Near => powerL=Off, powerR=Fwd (1)");
 
 colisCont = addRule(colisCont,"distL==Near & distR==TooClose => powerL=Rev, powerR=Fwd (1)");
-% colisCont = addRule(colisCont,"distL==Far & distR==TooClose => powerL=Rev, powerR=Fwd (1)");
 colisCont = addRule(colisCont,"distL==TooClose & distR==Near => powerL=Fwd, powerR=Rev (1)");
-% colisCont = addRule(colisCont,"distL==TooClose & distR==Far => powerL=Fwd, powerR=Rev (1)");
 
 colisCont = addRule(colisCont,"distL==Far & distR==Far & angle==TargetRight => powerL=Fwd, powerR=Rev (1)");
 colisCont = addRule(colisCont,"distL==Far & distR==Far & angle==TargetLeft => powerL=Rev, powerR=Fwd (1)");
@@ -66,5 +62,34 @@ colisCont.DefuzzificationMethod = 'centroid';
 % opt = gensurfOptions('OutputIndex',2);
 %  gensurf(colisCont,opt)
 % colisCont.Rules
-plotmf(colisCont,'input',1)
+figure
+plotmf(colisCont,'input',2)
 % ruleview(colisCont)
+
+
+%% tests
+% LS |  RS
+%----+----
+testSensorVals=[...
+0.7 0.7;
+0.2 0.3;
+0.6 0.8;
+0.3 0.2;
+0.8 0.6;
+1   1;
+];
+out = zeros([size(testSensorVals)]);
+Theta = pi/8
+for i = 1:length(testSensorVals(:,1))
+    array2write(1)=testSensorVals(i,1);
+    array2write(2)=testSensorVals(i,2);
+ array2write(3)=Theta;
+    contAction = evalfis(colisCont,array2write);
+
+
+    voltage_left = contAction([colisCont.Outputs.Name]=="powerL");
+    voltage_right = contAction([colisCont.Outputs.Name]=="powerR");
+    out(i,1) = voltage_left;
+    out(i,2)= voltage_right;
+end
+

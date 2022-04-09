@@ -1,0 +1,8 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c}{\PYGZpc{} Turning (Contingent on Sensor distances being \PYGZdq{}far\PYGZdq{})}
+\PYG{n}{colisCont} \PYG{p}{=} \PYG{n}{addRule}\PYG{p}{(}\PYG{n}{colisCont}\PYG{p}{,}\PYG{l+s}{\PYGZdq{}distL==Far \PYGZam{} distR==Far \PYGZam{} angle==TargetRight =\PYGZgt{} powerL=Fwd, powerR=Rev (1)\PYGZdq{}}\PYG{p}{);}
+\PYG{n}{colisCont} \PYG{p}{=} \PYG{n}{addRule}\PYG{p}{(}\PYG{n}{colisCont}\PYG{p}{,}\PYG{l+s}{\PYGZdq{}distL==Far \PYGZam{} distR==Far \PYGZam{} angle==TargetLeft =\PYGZgt{} powerL=Rev, powerR=Fwd (1)\PYGZdq{}}\PYG{p}{);}
+
+\PYG{c}{\PYGZpc{} Forward motion in \PYGZdq{}deadzone\PYGZdq{} (Contingent on Sensor distances being \PYGZdq{}far\PYGZdq{})}
+\PYG{n}{colisCont} \PYG{p}{=} \PYG{n}{addRule}\PYG{p}{(}\PYG{n}{colisCont}\PYG{p}{,}\PYG{l+s}{\PYGZdq{}distL==Far \PYGZam{} distR==Far \PYGZam{} angle==TargetCenter=\PYGZgt{} powerL=Fwd, powerR=Fwd (1)\PYGZdq{}}\PYG{p}{);}
+\end{Verbatim}

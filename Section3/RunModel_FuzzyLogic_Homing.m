@@ -24,15 +24,19 @@ set(0,'DefaultFigureWindowStyle','docked');
 homeDir = fileparts(mfilename('fullpath'));
 addpath(genpath(fullfile(homeDir,"../")))
 
-% BF
+%% BF setup
 stateEnum.vForward = 13;
 stateEnum.vRotate = 18;
 stateEnum.xPos = 19;
 stateEnum.yPos = 20;
 stateEnum.angHeading = 24;
-Controler ="Custom_Homing";%"Neural_Custom";% "Neural_Custom";
+Controler ="Custom_Homing"%"Neural_Custom";% "Neural_Custom";
+waypoints = 'WP_Task1'
+environment = "task1Walls"%"nowalls" 
+
+tolerance = 0.05; % the tollerance at which the robot is considered to have arrived
 saveFigPathRel = "Figures";
-idxWaypoint = 1;
+%%
 % checkpoints
 %    x      y
 points =[...
@@ -50,8 +54,13 @@ points_task2 =[...
     -3, -0;
     1.5, 2 ;...
         ];
-waypoints_tab = array2table(points_task2, 'VariableNames',{'X','Y'});
-tolerance = 0.05; % the tollerance at which the robot is considered to have arrived
+switch waypoints
+    case 'WP_Task1'
+        waypoints_tab = array2table(points, 'VariableNames',{'X','Y'});
+
+    case 'WP_Task2'
+        waypoints_tab = array2table(points_task2, 'VariableNames',{'X','Y'});
+end
 
 switch Controler % load in controler 
     case "Fuzzy"
@@ -100,7 +109,6 @@ obstacleMatrix = zeros(canvasSize_horizontal / stepSize_canvas, canvasSize_verti
 
 % Generate walls
 % --> the variable "obstacleMatrix" is updated for each added wall
-environment = "task2Walls";
 switch environment
     case "nowalls"
 
@@ -131,8 +139,9 @@ sensorOutLeft = zeros(timeSteps_total);
 sensorOutRight = zeros(timeSteps_total);
       
 
-
+%% loop variables init
 waypointsDone= false;
+idxWaypoint = 1;
 
 % Run simulation
 for timeStep = 1:timeSteps_total
@@ -151,12 +160,13 @@ for timeStep = 1:timeSteps_total
 
     
     NeuralInput.LS = sensorOutLeft(timeStep);
-    NeuralInput.RS = sensorOutRight(timeStep);
+    NeuralInput.RS = sensorOutRight(timeStep
 
     if idxWaypoint<=height(waypoints_tab)
         checkpoint = [waypoints_tab.X(idxWaypoint), waypoints_tab.Y(idxWaypoint)];
     else 
        waypointsDone= true;
+       break
     end
 
     % compute heading angle
@@ -225,10 +235,11 @@ end
 
 
 FigTag="xVy";
-thisFileName = fullfile(pwd,saveFigPathRel, strcat(FigTag,Controler));
+thisFileName = fullfile(pwd,saveFigPathRel, strcat(FigTag,Controler,waypoints,environment));
 figure(2); hold on; grid on;title("XY Path Robot taken");axis equal;
 plot(state(:,stateEnum.yPos), state(:,stateEnum.xPos));
 xlabel("y Position (m)"); ylabel("x Position (m)");
+scatter(waypoints_tab.Y(:),waypoints_tab.X,Marker="*")
 try
 plot(wall_1(:,1), wall_1(:,2),'k-');
 plot(wall_2(:,1), wall_2(:,2),'k-');
@@ -240,7 +251,7 @@ savefig(gcf,thisFileName)
 saveas(gcf,strcat(thisFileName,".png"))
 
 FigTag="xVt";
-thisFileName = fullfile(pwd,saveFigPathRel, strcat(FigTag,Controler));
+thisFileName = fullfile(pwd,saveFigPathRel, strcat(FigTag,Controler,waypoints,environment));
 figure(3); hold on; grid on;title("Robot X coord Vs time")
 plot(time, state(:,stateEnum.xPos));
 ylabel("x Position (m)"); xlabel("time (s)");
@@ -248,7 +259,7 @@ savefig(gcf,thisFileName)
 saveas(gcf,strcat(thisFileName,".png"))
 
 FigTag="psiVt";
-thisFileName = fullfile(pwd,saveFigPathRel, strcat(FigTag,Controler));
+thisFileName = fullfile(pwd,saveFigPathRel, strcat(FigTag,Controler,waypoints,environment));
 figure(4); hold on; grid on; title("Robot Heading angle Vs time")
 plot(time, state(:,stateEnum.angHeading));
 ylabel("Heading Angle (rad)"); xlabel("time (s)");

@@ -1,0 +1,10 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c}{\PYGZpc{}Turn Right Slow}
+\PYG{n}{colisCont} \PYG{p}{=} \PYG{n}{addRule}\PYG{p}{(}\PYG{n}{colisCont}\PYG{p}{,}\PYG{l+s}{\PYGZdq{}distL==Near \PYGZam{} distR==Far =\PYGZgt{} powerL=Fwd, powerR=Off (1)\PYGZdq{}}\PYG{p}{);}
+\PYG{c}{\PYGZpc{}Turn Left Slow}
+\PYG{n}{colisCont} \PYG{p}{=} \PYG{n}{addRule}\PYG{p}{(}\PYG{n}{colisCont}\PYG{p}{,}\PYG{l+s}{\PYGZdq{}distL==Far \PYGZam{} distR==Near =\PYGZgt{} powerL=Off, powerR=Fwd (1)\PYGZdq{}}\PYG{p}{);}
+\PYG{c}{\PYGZpc{}Turn Left Hard}
+\PYG{n}{colisCont} \PYG{p}{=} \PYG{n}{addRule}\PYG{p}{(}\PYG{n}{colisCont}\PYG{p}{,}\PYG{l+s}{\PYGZdq{}distL==Near \PYGZam{} distR==TooClose =\PYGZgt{} powerL=Rev, powerR=Fwd (1)\PYGZdq{}}\PYG{p}{);}
+\PYG{c}{\PYGZpc{}Turn Right Hard}
+\PYG{n}{colisCont} \PYG{p}{=} \PYG{n}{addRule}\PYG{p}{(}\PYG{n}{colisCont}\PYG{p}{,}\PYG{l+s}{\PYGZdq{}distL==TooClose \PYGZam{} distR==Near =\PYGZgt{} powerL=Fwd, powerR=Rev (1)\PYGZdq{}}\PYG{p}{);}
+\end{Verbatim}

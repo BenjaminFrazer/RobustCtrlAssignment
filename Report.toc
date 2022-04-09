@@ -1,0 +1,32 @@
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}%
+\contentsline {section}{\numberline {2}Implementation}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Collision Avoidance}{2}{subsection.2.1}%
+\contentsline {subsubsection}{\numberline {2.1.1}Sensor Characteristics}{2}{subsubsection.2.1.1}%
+\contentsline {subsubsection}{\numberline {2.1.2}Desired behaviour }{3}{subsubsection.2.1.2}%
+\contentsline {paragraph}{Turn 'aggressiveness'}{3}{section*.5}%
+\contentsline {paragraph}{Amplification of Small differences in sensor measurements}{3}{section*.6}%
+\contentsline {subsubsection}{\numberline {2.1.3}Collision Sensor Membership Functions}{4}{subsubsection.2.1.3}%
+\contentsline {subsubsection}{\numberline {2.1.4}Bias Term Implementation}{4}{subsubsection.2.1.4}%
+\contentsline {subsubsection}{\numberline {2.1.5}Membership Function Definition}{4}{subsubsection.2.1.5}%
+\contentsline {subsubsection}{\numberline {2.1.6}Collision Avoidance Rules}{5}{subsubsection.2.1.6}%
+\contentsline {subsubsection}{\numberline {2.1.7}Bias Term Implementation}{5}{subsubsection.2.1.7}%
+\contentsline {subsection}{\numberline {2.2}Way-point Seeking }{5}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}Input}{5}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}Desired behaviour}{6}{subsubsection.2.2.2}%
+\contentsline {paragraph}{Dead-zone}{7}{section*.11}%
+\contentsline {subsubsection}{\numberline {2.2.3}Membership Functions}{7}{subsubsection.2.2.3}%
+\contentsline {subsubsection}{\numberline {2.2.4}Collision avoidance prioritisation}{7}{subsubsection.2.2.4}%
+\contentsline {subsubsection}{\numberline {2.2.5}Turn Aggressiveness }{8}{subsubsection.2.2.5}%
+\contentsline {subsubsection}{\numberline {2.2.6}Way-point seeking rules}{8}{subsubsection.2.2.6}%
+\contentsline {section}{\numberline {3}Test Plan}{8}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Collision avoidance tests}{8}{subsection.3.1}%
+\contentsline {section}{\numberline {4}Results}{9}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Final Path No Walls}{9}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Final Path With Walls}{10}{subsection.4.2}%
+\contentsline {section}{\numberline {5}Discussion}{10}{section.5}%
+\contentsline {subsection}{\numberline {5.1}'Wall Scrape' }{10}{subsection.5.1}%
+\contentsline {section}{\numberline {6}Improvements}{11}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Acting on \(\Delta \) Distance}{11}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Acting on absolute distance to target}{11}{subsection.6.2}%
+\contentsline {section}{\numberline {7}Conclusion}{11}{section.7}%
+\contentsline {section}{\numberline {8}Appendices}{11}{section.8}%

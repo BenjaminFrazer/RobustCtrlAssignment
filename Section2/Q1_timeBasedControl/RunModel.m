@@ -49,10 +49,10 @@ state_initial = zeros(1,24);        % VARIABLES OF IMPORTANCE:
                                     % state_initial(24): heading angle,       psi, rad
 doTurnRight = true;
 turnRightTime = 1;
-turnRightAngleFinal = pi/2; %turn until we reach this angle
+turnRightAngleFinal = -pi/2*0.7; %turn until we reach this angle
 
 turnLeftTime = 4;
-turnLeftAngleFinal = 0; %turn until we reach this angle 
+turnLeftAngleFinal = -pi/2*0.3; %turn until we reach this angle 
 doTurnLeft = false;
 % Environment
 canvasSize_horizontal = 10;
@@ -94,7 +94,7 @@ for timeStep = 1:timeSteps_total
     % *-------------------------------------*
     %turn right (positive Psy)
     if doTurnRight %test if we have reached angle
-        if state(timeStep,stateEnum.angHeading)>=turnRightAngleFinal
+        if state(timeStep,stateEnum.angHeading)<=turnRightAngleFinal
             doTurnRight = false; % completed turn
             voltage_right = 6;
             voltage_left = 6;
@@ -103,13 +103,13 @@ for timeStep = 1:timeSteps_total
     end
 
     if (timeStep > turnRightTime/stepSize_time) && doTurnRight
-        voltage_left  = 6;
-        voltage_right = -6;
+        voltage_left  = -6;
+        voltage_right = 6;
     end
 
     %turn left (neg Psy)
     if doTurnLeft %test if we have reached angle
-        if state(timeStep,stateEnum.angHeading)<=turnLeftAngleFinal
+        if state(timeStep,stateEnum.angHeading)>=turnLeftAngleFinal
             doTurnLeft = false; % completed turn
             voltage_right = 6;
             voltage_left = 6;
@@ -117,8 +117,8 @@ for timeStep = 1:timeSteps_total
     end
 
     if (timeStep > turnLeftTime/stepSize_time) && doTurnLeft
-        voltage_left  = -6;
-        voltage_right = 6;
+        voltage_left  = 6;
+        voltage_right = -6;
     end
     
     % Run model *** DO NOT CHANGE
